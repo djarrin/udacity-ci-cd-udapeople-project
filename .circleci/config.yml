@@ -145,6 +145,10 @@ jobs:
           command: |
             yum -y install tar
       - run:
+          name: Install gzip
+          command: |
+            yum -y install gzip
+      - run:
           name: Ensure back-end infrastructure exists
           command: |
             aws cloudformation deploy \
