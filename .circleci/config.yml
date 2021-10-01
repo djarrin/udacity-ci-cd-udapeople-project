@@ -1,5 +1,10 @@
 version: 2.1
 
+parameters:
+  workflow-id:
+    type: string
+    default: ${CIRCLE_WORKFLOW_ID:0:7}
+
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -138,6 +143,8 @@ jobs:
   deploy-infrastructure:
     docker:
       - image: amazon/aws-cli
+    environment:
+      WORKFLOW_ID: <<pipeline.parameters.workflow-id>>
     steps:
       - checkout
       - run:
@@ -146,21 +153,24 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
               --tags project=udapeople \
-              --stack-name "udapeople-be-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
+                     Name=udapeople-be-${WORKFLOW_ID}
+              --stack-name "udapeople-be-${WORKFLOW_ID}" \
+              --parameter-overrides ID="${WORKFLOW_ID}"
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/frontend.yml \
               --tags project=udapeople \
-              --stack-name "udapeople-fe-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
+              --stack-name "udapeople-fe-${WORKFLOW_ID}" \
+              --parameter-overrides ID="${WORKFLOW_ID}"
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            # Your code here
-            exit 1
+            aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters Name=tag:Name,Values=udapeople-be-${WORKFLOW_ID} \
+            --output text >> inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
