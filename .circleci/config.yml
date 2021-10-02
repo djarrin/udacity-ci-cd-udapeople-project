@@ -8,7 +8,8 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name udapeople-fe-${CIRCLE_WORKFLOW_ID:0:7} && aws cloudformation delete-stack --stack-name udapeople-be-${CIRCLE_WORKFLOW_ID:0:7}
+            aws cloudformation delete-stack --stack-name udapeople-fe-${CIRCLE_WORKFLOW_ID:0:7}
+            aws cloudformation delete-stack --stack-name udapeople-be-${CIRCLE_WORKFLOW_ID:0:7}
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -169,16 +170,17 @@ jobs:
             --filters Name=tag:Name,Values=udapeople-be-${CIRCLE_WORKFLOW_ID:0:7} \
             --output text >> inventory.txt
       - persist_to_workspace:
-          root: ~/
+          root: ansible
           paths:
-            - project/.circleci/ansible/inventory.txt
+            - .circleci/ansible/inventory.txt
       # Here's where you will add some code to rollback on failure
       - destroy-environment
 
   configure-infrastructure:
     docker:
       # Docker image here that supports Ansible
-      - image: python:3.7-alpine3.11
+      - image: amazon/aws-cli
+#      - image: python:3.7-alpine3.11
         environment:
           TYPEORM_CONNECTION: $TYPEORM_CONNECTION
           TYPEORM_HOST: $TYPEORM_HOST
@@ -195,7 +197,7 @@ jobs:
           fingerprints: [ "2f:bc:c6:c4:f3:ae:94:b9:b6:78:ac:2a:f8:1f:91:41" ]
       # attach workspace
       - attach_workspace:
-          at: ~/
+          at: /tmp/ansible
       - run:
           name: Install dependencies
           command: |
@@ -203,7 +205,7 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i inventory.txt ansible/configure-server.yml
+            ansible-playbook -i /tmp/ansible/inventory.txt .circleci/ansible/configure-server.yml
       # Here's where you will add some code to rollback on failure
       - destroy-environment
 
