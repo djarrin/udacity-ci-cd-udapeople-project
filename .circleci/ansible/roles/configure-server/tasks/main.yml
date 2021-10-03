@@ -20,7 +20,7 @@
   become: yes
   npm:
     name: pm2
-    global: yes
+#    global: yes
 
-- name: "Start Node Server"
-  command: pm2 start npm --name "udapeople" -- run "start:prod"
+#- name: "Start Node Server"
+#  command: pm2 start npm --name "udapeople" -- run "start:prod"
