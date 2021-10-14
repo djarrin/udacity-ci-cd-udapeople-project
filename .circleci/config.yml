@@ -223,22 +223,34 @@ jobs:
       # Here's where you will add some code to rollback on failure
       - destroy-environment
 
-#  run-migrations:
-#    docker:
-#      # Docker image here that supports NodeJS
-#    steps:
-#      # Checkout code from git
-#      - run:
-#          name: Run migrations
-#          command: |
-#            # Your code here
-#            exit 1
-#      - run:
-#          name: Send migration results to memstash
-#          command: |
-#            # Your code here
-#            exit 1
-#     # Here's where you will add some code to rollback on failure
+  run-migrations:
+    docker:
+      # Docker image here that supports NodeJS
+      - image: circleci/node:13.8.0
+    steps:
+      # Checkout code from git
+      - checkout
+      - restore_cache:
+          keys: [ backend-build ]
+      - install-aws-cli
+      - run:
+          name: Run migrations
+          command: |
+            cd backend
+            npm install
+            npm run build
+            npm run migrations > migration.log
+      - run:
+          name: Send migration results to memstash
+          command: |
+            if [ 1 -eq $(grep -c "has been executed successfully" migration.log) ]
+             then
+               curl -H "Content-Type: text/plain" -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request PUT --data "1" https://api.memstash.io/values/migrationResults
+             else
+               curl -H "Content-Type: text/plain" -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request PUT --data "0" https://api.memstash.io/values/migrationResults
+             fi
+      - destroy-environment
+
 
 #  deploy-frontend:
 #    docker:
@@ -356,8 +368,8 @@ workflows:
               only: [deploy-infrastructure]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
-#      - run-migrations:
-#          requires: [configure-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
 #      - deploy-frontend:
 #          requires: [run-migrations]
 #      - deploy-backend:
