@@ -14,6 +14,7 @@ commands:
               then
                 apk --no-cache add curl
               fi
+              alias python="python3"
               curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
               unzip awscli-bundle.zip
               ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
@@ -263,7 +264,7 @@ jobs:
       - run:
           name: Send migration results to memstash
           command: |
-            if [ 1 -eq $(grep -c "has been executed successfully" migration.log) ]
+            if grep -Fxq "has been executed successfully" migration.log
              then
                curl -H "Content-Type: text/plain" -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request PUT --data "1" https://api.memstash.io/values/migrationResults
              else
