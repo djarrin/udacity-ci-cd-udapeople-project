@@ -8,6 +8,16 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
+            if ! command -v aws &> /dev/null
+            then
+              if ! command -v curl &> /dev/null
+              then
+                apk --no-cache add curl
+              fi
+              curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+              unzip awscli-bundle.zip
+              ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+            fi
             aws cloudformation delete-stack --stack-name udapeople-fe-${CIRCLE_WORKFLOW_ID:0:7}
             aws cloudformation delete-stack --stack-name udapeople-be-${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -215,7 +225,6 @@ jobs:
       # attach workspace
       - attach_workspace:
           at: /tmp/.circleci/ansible
-      - install-aws-cli
       - run:
           name: Install dependencies
           command: |
@@ -244,7 +253,6 @@ jobs:
       - checkout
       - restore_cache:
           keys: [ backend-build ]
-#      - install-aws-cli
       - run:
           name: Run migrations
           command: |
