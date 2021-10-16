@@ -276,7 +276,7 @@ jobs:
             cd backend
             ls
             cat migration.log
-            if grep -Fxq "has been executed successfully" migration.log
+            if grep -Fq "has been executed successfully" migration.log
              then
                echo "migration completed"
                curl -H "Content-Type: text/plain" -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request PUT --data "1" https://api.memstash.io/values/migrationResults
