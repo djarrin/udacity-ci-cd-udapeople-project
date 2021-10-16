@@ -270,6 +270,7 @@ jobs:
       - run:
           name: Send migration results to memstash
           command: |
+            cd backend
             ls
             if grep -Fxq "has been executed successfully" migration.log
              then
