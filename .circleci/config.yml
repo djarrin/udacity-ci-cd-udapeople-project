@@ -258,13 +258,19 @@ jobs:
           name: Run migrations
           command: |
             cd backend
+            pwd
+            ls
             touch migration.log
+            ls
             npm install
             npm run build
+            echo "starting migration"
             npm run migrations > migration.log
+            echo "migration done"
       - run:
           name: Send migration results to memstash
           command: |
+            ls
             if grep -Fxq "has been executed successfully" migration.log
              then
                curl -H "Content-Type: text/plain" -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request PUT --data "1" https://api.memstash.io/values/migrationResults
