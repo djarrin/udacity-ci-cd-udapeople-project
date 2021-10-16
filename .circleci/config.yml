@@ -283,16 +283,16 @@ jobs:
   deploy-frontend:
     docker:
       # Docker image here that supports AWS CLI
-      - image: amazon/aws-cli
+      - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
       - checkout
       - restore_cache:
           keys: [ frontend-build ]
+      - install-aws-cli
       - run:
           name: Install dependencies
           command: |
-            apk add --update curl nodejs npm
             cd frontend
             npm install
       - run:
