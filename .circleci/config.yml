@@ -266,16 +266,20 @@ jobs:
             npm run build
             echo "starting migration"
             npm run migrations > migration.log
+            cat migration.log
             echo "migration done"
       - run:
           name: Send migration results to memstash
           command: |
             cd backend
             ls
+            cat migration.log
             if grep -Fxq "has been executed successfully" migration.log
              then
+               echo "migration completed"
                curl -H "Content-Type: text/plain" -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request PUT --data "1" https://api.memstash.io/values/migrationResults
              else
+               echo "migration failed"
                curl -H "Content-Type: text/plain" -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request PUT --data "0" https://api.memstash.io/values/migrationResults
              fi
       - destroy-environment
