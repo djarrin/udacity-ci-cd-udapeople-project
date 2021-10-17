@@ -1,6 +1,6 @@
 - name: Copy Files Into Server
   copy:
-    src: ~/project/backend/dist
+    src: ~/project/backend/dist/
     dest: /home/ubuntu/
 
 - name: Start Server
