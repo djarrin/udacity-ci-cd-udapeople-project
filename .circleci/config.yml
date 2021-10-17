@@ -38,20 +38,18 @@ commands:
             ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
-    parameters:
-      # Add parameter here
     steps:
       - run:
           name: Revert migrations
-          # Add when this will run
+          when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1
-            if(( $SUCCESS==1 ));
+            SUCCESS = curl -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request GET https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
+            if(( $SUCCESS==0 ));
             then
-            #  cd ~/project/backend
-            #  npm install
-            #  Add revert code here. You can find this in the Getting Started section.
+              cd ~/project/backend
+              npm install
+              npm run migrations:revert
               exit 1
             fi
 
@@ -278,6 +276,7 @@ jobs:
                curl -H "Content-Type: text/plain" -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request PUT --data "0" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
              fi
       - destroy-environment
+      - revert-migrations
 
 
   deploy-frontend:
@@ -312,22 +311,59 @@ jobs:
             aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-environment
 
-#  deploy-backend:
-#    docker:
-#      # Docker image here that supports Ansible
-#    steps:
-#      # Checkout code from git
-#      # Add ssh keys with fingerprint
-#      # attach workspace
-#      - run:
-#          name: Install dependencies
-#          command: |
-#            # your code here
-#      - run:
-#          name: Deploy backend
-#          command: |
-#            # your code here
-#      # Here's where you will add some code to rollback on failure
+  deploy-backend:
+    docker:
+      - image: python:3.7-alpine3.11
+#        environment:
+#          TYPEORM_CONNECTION: $TYPEORM_CONNECTION
+#          TYPEORM_HOST: $TYPEORM_HOST
+#          TYPEORM_USERNAME: $TYPEORM_USERNAME
+#          TYPEORM_PASSWORD: $TYPEORM_PASSWORD
+#          TYPEORM_DATABASE: $TYPEORM_DATABASE
+#          TYPEORM_MIGRATIONS: $TYPEORM_MIGRATIONS
+#          TYPEORM_ENTITIES: $TYPEORM_ENTITIES
+    steps:
+      # Checkout code from git
+      - checkout
+      # Add ssh keys with fingerprint
+      - fingerprints: [ "2f:bc:c6:c4:f3:ae:94:b9:b6:78:ac:2a:f8:1f:91:41" ]
+      # attach workspace
+      - attach_workspace:
+          at: /tmp/.circleci/ansible
+      - restore_cache:
+          keys: [ backend-build ]
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible nodejs npm
+      - run:
+          name: Setup backend .env file
+          command: |
+            cd backend
+            echo NODE_ENV=$ENVIROMENT > .env
+            echo VERSION=1 >> .env
+            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> .env
+            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> .env
+            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> .env
+            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> .env
+            echo TYPEORM_HOST=$TYPEORM_HOST >> .env
+            echo TYPEORM_PORT=$TYPEORM_PORT >> .env
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> .env
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> .env
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> .env
+            cat .env
+      - run:
+          name: Build backend with new env vars
+          command: |
+            cd backend
+            npm install
+            npm run build
+      - run:
+          name: Deploy backend
+          command: |
+            ansible-playbook -i /tmp/.circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml
+      - destroy-environment
+      - revert-migrations
 
 #  smoke-test:
 #    docker:
@@ -391,29 +427,28 @@ workflows:
   default:
     jobs:
       - build-frontend
-#      - build-backend
-#      - test-frontend:
-#          requires: [build-frontend]
-#      - test-backend:
-#          requires: [build-backend]
-#      - scan-backend:
-#          requires: [build-backend]
-#      - scan-frontend:
-#          requires: [build-frontend]
-      - deploy-infrastructure
-#          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-#          filters:
-#            branches:
-#              only: [deploy-infrastructure]
-#      - configure-infrastructure:
-#          requires: [deploy-infrastructure]
-#      - run-migrations:
-#          requires: [configure-infrastructure]
+      - build-backend
+      - test-frontend:
+          requires: [build-frontend]
+      - test-backend:
+          requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          filters:
+            branches:
+              only: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
       - deploy-frontend:
-#          requires: [run-migrations]
-          requires: [build-frontend, deploy-infrastructure]
-#      - deploy-backend:
-#          requires: [run-migrations]
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
 #      - smoke-test:
 #          requires: [deploy-backend, deploy-frontend]
 #      - cloudfront-update:
