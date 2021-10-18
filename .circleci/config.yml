@@ -372,7 +372,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            export API_URL= curl -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request GET https://api.memstash.io/values/api_url_${CIRCLE_WORKFLOW_ID}
+            export API_URL= $(curl -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request GET https://api.memstash.io/values/api_url_${CIRCLE_WORKFLOW_ID})
             echo API_URL
       - run:
           name: Backend smoke test.
