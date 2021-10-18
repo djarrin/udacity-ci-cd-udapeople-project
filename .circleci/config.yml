@@ -19,6 +19,7 @@ commands:
               unzip awscli-bundle.zip
               ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
             fi
+            aws s3 rm s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
             aws cloudformation delete-stack --stack-name udapeople-fe-${CIRCLE_WORKFLOW_ID:0:7}
             aws cloudformation delete-stack --stack-name udapeople-be-${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -45,14 +46,13 @@ commands:
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
             SUCCESS=$(curl -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request GET https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID})
-            if(( $SUCCESS==1 ));
+            echo SUCCESS
+            if(( $SUCCESS == 1 ));
             then
               cd ~/project/backend
               npm install
               npm run migrations:revert
-              exit 1
             fi
-            exit 1
 
 jobs:
   build-frontend:
@@ -383,7 +383,7 @@ jobs:
             echo "request URL: ${API_URL}/api/status"
             if curl "${API_URL}/api/status" | grep "ok"
             then
-                return 0
+                return 1
             else
                 return 1
             fi
@@ -394,12 +394,11 @@ jobs:
             echo ${URL}
             if curl -s ${URL} | grep "Welcome"
             then
-                # Change this to 0 after the job fails
-              return 1
+              return 0
             else
               return 1
             fi
-#      - destroy-environment
+      - destroy-environment
       - revert-migrations
 
 #  cloudfront-update:
