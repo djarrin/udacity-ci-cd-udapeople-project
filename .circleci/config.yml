@@ -348,12 +348,12 @@ jobs:
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> .env
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> .env
             cat .env
-      - run:
-          name: Build backend with new env vars
-          command: |
-            cd backend
-            npm install
-            npm run build
+#      - run:
+#          name: Build backend with new env vars
+#          command: |
+#            cd backend
+#            npm install
+#            npm run build
       - run:
           name: Deploy backend
           command: |

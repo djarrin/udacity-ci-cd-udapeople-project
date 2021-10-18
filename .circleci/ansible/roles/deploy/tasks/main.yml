@@ -1,10 +1,16 @@
 - name: Copy Files Into Server
   copy:
-    src: ~/project/backend/dist/
+    src: ~/project/backend/
     dest: /home/ubuntu/
+
+- name: Do NPM Install
+  shell: |
+    cd /home/ubuntu/backend
+    npm install
+    npm run build
 
 - name: Start Server
   shell: |
-    cd /home/ubuntu/
+    cd /home/ubuntu/backend
     pm2 stop default
-    pm2 start main.js
+    pm2 start npm -- start
