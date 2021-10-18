@@ -52,6 +52,7 @@ commands:
               npm run migrations:revert
               exit 1
             fi
+            exit 1
 
 jobs:
   build-frontend:
@@ -373,10 +374,11 @@ jobs:
           name: Get backend url
           command: |
             API_URL=$(curl -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request GET https://api.memstash.io/values/api_url_${CIRCLE_WORKFLOW_ID})
-            echo API_URL
+            echo ${API_URL}
       - run:
           name: Backend smoke test.
           command: |
+            echo "request URL: "${API_URL}/api/status"
             if curl "${API_URL}/api/status" | grep "ok"
             then
                 return 0
