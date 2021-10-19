@@ -48,7 +48,7 @@ commands:
             echo "memstash request URL: https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}"
             SUCCESS=$(curl -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request GET https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID})
             echo "SUCCESS: ${SUCCESS}"
-            if (( $SUCCESS == 1 ));
+            if [[ $SUCCESS == 1 ]];
             then
               echo "conditional passed"
               pwd
@@ -377,7 +377,7 @@ jobs:
             if curl "${API_URL}/api/status" | grep "ok"
             then
                 echo "Backend Smoke Test Passed"
-                return 1
+                return 0
             else
                 echo "Backend Smoke Test Faild"
                 return 1
@@ -396,20 +396,24 @@ jobs:
       - destroy-environment
       - revert-migrations
 
-#  cloudfront-update:
-#    docker:
-#      # Docker image here that supports AWS CLI
-#    steps:
-#      # Checkout code from git
+  cloudfront-update:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
 #      - run:
 #          name: Install dependencies
 #          command: |
 #            # your code here
-#      - run:
-#          name: Update cloudfront distribution
-#          command: |
-#            # your code here
-#      # Here's where you will add some code to rollback on failure
+      - run:
+          name: Update cloudfront distribution
+          command: |
+            aws cloudformation deploy \
+                    --template-file .circleci/files/cloudfront.yml \
+                    --stack-name udapeople-fe-${OldWorkflowID} \
+                    --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
+                    --tags project=udapeople
+      # Here's where you will add some code to rollback on failure
 
 cleanup:
     docker:
