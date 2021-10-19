@@ -45,10 +45,12 @@ commands:
           when: on_fail
           command: |
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
+            echo "memstash request URL: https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}"
             SUCCESS=$(curl -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request GET https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID})
-            echo SUCCESS
+            echo $SUCCESS
             if(( $SUCCESS == 1 ));
             then
+              pwd
               cd ~/project/backend
               npm install
               npm run migrations:revert
@@ -349,12 +351,6 @@ jobs:
             echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> .env
             echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> .env
             cat .env
-#      - run:
-#          name: Build backend with new env vars
-#          command: |
-#            cd backend
-#            npm install
-#            npm run build
       - run:
           name: Deploy backend
           command: |
@@ -371,11 +367,6 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update curl
-#      - run:
-#          name: Get backend url
-#          command: |
-#
-#            echo ${API_URL}
       - run:
           name: Backend smoke test.
           command: |
@@ -383,8 +374,10 @@ jobs:
             echo "request URL: ${API_URL}/api/status"
             if curl "${API_URL}/api/status" | grep "ok"
             then
+                echo "Backend Smoke Test Passed"
                 return 1
             else
+                echo "Backend Smoke Test Faild"
                 return 1
             fi
       - run:
