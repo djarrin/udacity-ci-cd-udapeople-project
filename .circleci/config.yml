@@ -413,15 +413,16 @@ jobs:
               --no-paginate --output text)
             aws cloudformation deploy \
                     --template-file .circleci/files/cloudfront.yml \
-                    --stack-name udapeople-fe-${OldWorkflowID} \
-                    --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
+                    --stack-name udapeople-distribution-${OldWorkflowID} \
+                    --parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}" \
                     --tags project=udapeople
 
             echo "old workflowID: ${OldWorkflowID}"
             echo "new workflowID: ${CIRCLE_WORKFLOW_ID:0:7}"
 
 #            curl -H "Content-Type: text/plain" -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request PUT --data "0" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
-      # Here's where you will add some code to rollback on failure
+        - destroy-environment
+        - revert-migrations
 
 cleanup:
     docker:
