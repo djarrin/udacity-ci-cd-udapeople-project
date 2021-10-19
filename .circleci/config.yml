@@ -421,8 +421,8 @@ jobs:
             echo "new workflowID: ${CIRCLE_WORKFLOW_ID:0:7}"
 
 #            curl -H "Content-Type: text/plain" -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request PUT --data "0" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}
-        - destroy-environment
-        - revert-migrations
+      - destroy-environment
+      - revert-migrations
 
 cleanup:
     docker:
