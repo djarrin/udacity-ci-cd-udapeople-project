@@ -47,14 +47,16 @@ commands:
             # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
             echo "memstash request URL: https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID}"
             SUCCESS=$(curl -H "token: c402f2ac-dcbe-431f-8b8c-19fc2ba90478" --request GET https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID})
-            echo $SUCCESS
+            echo "SUCCESS: ${SUCCESS}"
             if (( $SUCCESS == 1 ));
             then
+              echo "conditional passed"
               pwd
               cd ~/project/backend
               npm install
               npm run migrations:revert
             fi
+            echo "conditional passed by"
 
 jobs:
   build-frontend:
