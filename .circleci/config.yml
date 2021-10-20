@@ -444,11 +444,14 @@ jobs:
         - run:
             name: Remove old stacks and files
             command: |
+              echo "OldWorkflowID: ${OldWorkflowID}"
+              echo "STACKS[@]: ${STACKS[@]}"
               if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
               then
                 echo "we have some things to delete"
+                echo $BASH_REMATCH[@]
                 for i in $BASH_REMATCH; do # Not recommended, will break on whitespace
-                    echo $BASH_REMATCH[$i]
+                    echo "need to delete ${BASH_REMATCH[i]}"
                 done
               fi
 
