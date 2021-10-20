@@ -53,6 +53,7 @@ export abstract class BaseRepository<TId, TEntity extends IAggregateRoot<TId>> {
   }
 
   async findById(id: TId | any): Promise<TEntity> {
+    // @ts-ignore
     return this.repository.findOneOrFail(id);
   }
 
