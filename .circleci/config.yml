@@ -441,11 +441,7 @@ jobs:
               export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
                                     --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
               echo "Stack names: ${STACKS[@]}"
-        - run:
-            name: Remove old stacks and files
-            command: |
-              echo "OldWorkflowID: ${OldWorkflowID}"
-              echo "STACKS[@]: ${STACKS[@]}"
+
               if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
               then
                 echo "we have some things to delete"
@@ -454,6 +450,10 @@ jobs:
                     echo "need to delete ${BASH_REMATCH[i]}"
                 done
               fi
+#        - run:
+#            name: Remove old stacks and files
+#            command: |
+
 
 
 workflows:
