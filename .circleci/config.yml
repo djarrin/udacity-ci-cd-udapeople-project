@@ -431,7 +431,7 @@ jobs:
       steps:
         - checkout
         - run:
-            name: Get old stack workflow id
+            name: Delete Old Workflow Stacks
             command: |
               export OldWorkflowID=$(aws cloudformation \
                                            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
@@ -445,16 +445,13 @@ jobs:
               if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
               then
                 echo "we have some things to delete"
-                echo $BASH_REMATCH[@]
-                for i in $BASH_REMATCH; do # Not recommended, will break on whitespace
-                    echo "need to delete ${BASH_REMATCH[i]}"
-                done
+                echo $BASH_REMATCH[1]
+                echo $BASH_REMATCH[2]
+                echo $BASH_REMATCH[3]
+#                for i in $BASH_REMATCH; do # Not recommended, will break on whitespace
+#                    echo "need to delete ${BASH_REMATCH[i]}"
+#                done
               fi
-#        - run:
-#            name: Remove old stacks and files
-#            command: |
-
-
 
 workflows:
   default:
