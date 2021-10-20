@@ -22,6 +22,3 @@
     global: yes
     production: yes
     state: present
-
-#- name: "Start Node Server"
-#  command: pm2 start npm --name "udapeople" -- run "start:prod"
