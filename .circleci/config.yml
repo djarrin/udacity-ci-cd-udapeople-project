@@ -445,6 +445,7 @@ jobs:
               if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
               then
                 echo "we have some things to delete"
+                echo "${BASH_REMATCH[0]}"
                 echo "${BASH_REMATCH[1]}"
                 echo "${BASH_REMATCH[2]}"
                 echo "${BASH_REMATCH[3]}"
