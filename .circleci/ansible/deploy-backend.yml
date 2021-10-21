@@ -15,3 +15,4 @@
         minutes: 1
   roles:
     - deploy
+    - configure-prometheus-node-exporter
