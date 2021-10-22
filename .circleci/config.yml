@@ -97,13 +97,10 @@ jobs:
     docker:
       - image: circleci/node:13.8.0
     steps:
-      # Checkout code from git
       - checkout
-      # Restore from cache
       - restore_cache:
           keys:
             - frontend-build
-      # Your job code here
       - run:
           name: Test Frontend
           command: |
@@ -114,13 +111,10 @@ jobs:
     docker:
       - image: circleci/node:13.8.0
     steps:
-      # Checkout code from git
       - checkout
-      # Restore from cache
       - restore_cache:
           keys:
             - backend-build
-      # Your job code here
       - run:
           name: Test Backend
           command: |
@@ -131,13 +125,10 @@ jobs:
     docker:
       - image: circleci/node:13.8.0
     steps:
-      # Checkout code from git
       - checkout
-      # Restore from cache
       - restore_cache:
           keys:
             - frontend-build
-      # Your job code here
       - run:
           name: Audit FrontEnd
           command: |
@@ -148,13 +139,10 @@ jobs:
     docker:
       - image: circleci/node:13.8.0
     steps:
-      # Checkout code from git
       - checkout
-      # Restore from cache
       - restore_cache:
           keys:
             - backend-build
-      # Your job code here
       - run:
           name: Audit BackEnd
           command: |
@@ -221,12 +209,9 @@ jobs:
           TYPEORM_MIGRATIONS: $TYPEORM_MIGRATIONS
           TYPEORM_ENTITIES: $TYPEORM_ENTITIES
     steps:
-      # Checkout code from git
       - checkout
-      # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints: [ "2f:bc:c6:c4:f3:ae:94:b9:b6:78:ac:2a:f8:1f:91:41" ]
-      # attach workspace
       - attach_workspace:
           at: /tmp/.circleci/ansible
       - run:
@@ -237,12 +222,10 @@ jobs:
           name: Configure server
           command: |
             ansible-playbook -i /tmp/.circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
-      # Here's where you will add some code to rollback on failure
       - destroy-environment
 
   run-migrations:
     docker:
-      # Docker image here that supports NodeJS
       - image: circleci/node:13.8.0
         environment:
           ENVIRONMENT: $ENVIRONMENT
@@ -254,7 +237,6 @@ jobs:
           TYPEORM_MIGRATIONS: $TYPEORM_MIGRATIONS
           TYPEORM_ENTITIES: $TYPEORM_ENTITIES
     steps:
-      # Checkout code from git
       - checkout
       - restore_cache:
           keys: [ backend-build ]
@@ -289,7 +271,6 @@ jobs:
     docker:
       - image: python:3.7-alpine3.11
     steps:
-      # Checkout code from git
       - checkout
       - restore_cache:
           keys: [ frontend-build ]
@@ -323,12 +304,9 @@ jobs:
     docker:
       - image: python:3.7-alpine3.11
     steps:
-      # Checkout code from git
       - checkout
-      # Add ssh keys with fingerprint
       - add_ssh_keys:
           fingerprints: [ "2f:bc:c6:c4:f3:ae:94:b9:b6:78:ac:2a:f8:1f:91:41" ]
-      # attach workspace
       - attach_workspace:
           at: /tmp/.circleci/ansible
       - restore_cache:
